@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Dapper;
 
 namespace Renato.ECommerce.SQLDataAccess.Repositories
 {
@@ -18,7 +19,13 @@ namespace Renato.ECommerce.SQLDataAccess.Repositories
 
         public IEnumerable<Product> GetFeaturedProducts()
         {
-            return context.Products.Where(e => e.IsFeatured);
+            string query = "SELECT * FROM Products P";
+
+            using (var con = context.Connection)
+            {
+                var produtos = con.Query<Product>(query);
+                return produtos.Where(e => e.IsFeatured);
+            }
         }
     }
 }

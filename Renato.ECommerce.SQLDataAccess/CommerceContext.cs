@@ -1,12 +1,16 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Renato.ECommerce.Domain.Models;
+using System.Data.SqlClient;
 
 namespace Renato.ECommerce.SQLDataAccess
 {
-    public class CommerceContext : DbContext
+    public class CommerceContext : IDisposable
     {
         private readonly string connectionString;
+        
+        private SqlConnection _connection;
+        public SqlConnection Connection => _connection ?? (_connection = GetOpenConnection());
 
         public CommerceContext(string connectionString)
         {
@@ -16,11 +20,16 @@ namespace Renato.ECommerce.SQLDataAccess
             this.connectionString = connectionString;
         }
 
-        public DbSet<Product> Products { get; set; }
+        private SqlConnection GetOpenConnection()
+        {   
+            var connection = new SqlConnection(connectionString);
+            connection.Open();
+            return connection;
+        }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        public void Dispose()
         {
-            optionsBuilder.UseSqlServer(this.connectionString);
+            _connection?.Dispose();
         }
     }
 }
